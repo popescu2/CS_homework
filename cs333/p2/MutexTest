@@ -1,0 +1,92 @@
+Script started on Tue 20 Oct 2015 12:53:21 PM PDT
+]0;matthew@matthew-Aspire-E1-572: p2matthew@matthew-Aspire-E1-572:p2$ blitz os -g
+Beginning execution...
+====================  KPL PROGRAM STARTING  ====================
+Example Thread-based Programs...
+Initializing Thread Scheduler...
+
+-- You should see 70 lines, each consecutively numbered. --
+
+LockTester-A = 1
+LockTester-B = 2
+LockTester-C = 3
+LockTester-C = 4
+LockTester-C = 5
+LockTester-C = 6
+LockTester-C = 7
+LockTester-C = 8
+LockTester-A = 9
+LockTester-C = 10
+LockTester-D = 11
+LockTester-E = 12
+LockTester-F = 13
+LockTester-B = 14
+LockTester-G = 15
+LockTester-A = 16
+LockTester-C = 17
+LockTester-D = 18
+LockTester-F = 19
+LockTester-E = 20
+LockTester-G = 21
+LockTester-B = 22
+LockTester-C = 23
+LockTester-D = 24
+LockTester-F = 25
+LockTester-A = 26
+LockTester-G = 27
+LockTester-E = 28
+LockTester-C = 29
+LockTester-D = 30
+LockTester-F = 31
+LockTester-B = 32
+LockTester-G = 33
+LockTester-A = 34
+LockTester-D = 35
+LockTester-F = 36
+LockTester-E = 37
+LockTester-G = 38
+LockTester-B = 39
+LockTester-A = 40
+LockTester-F = 41
+LockTester-D = 42
+LockTester-G = 43
+LockTester-E = 44
+LockTester-B = 45
+LockTester-F = 46
+LockTester-D = 47
+LockTester-G = 48
+LockTester-A = 49
+LockTester-E = 50
+LockTester-F = 51
+LockTester-D = 52
+LockTester-G = 53
+LockTester-B = 54
+LockTester-A = 55
+LockTester-F = 56
+LockTester-D = 57
+LockTester-G = 58
+LockTester-E = 59
+LockTester-B = 60
+LockTester-A = 61
+LockTester-F = 62
+LockTester-G = 63
+LockTester-D = 64
+LockTester-E = 65
+LockTester-B = 66
+LockTester-A = 67
+LockTester-E = 68
+LockTester-B = 69
+LockTester-E = 70
+
+*****  A 'wait' instruction was executed and no more interrupts are scheduled... halting emulation!  *****
+
+Done!  The next instruction to execute will be:
+000EC8: 09000000       ret     
+Number of Disk Reads    = 0
+Number of Disk Writes   = 0
+Instructions Executed   = 433074
+Time Spent Sleeping     = 0
+    Total Elapsed Time  = 433074
+]0;matthew@matthew-Aspire-E1-572: p2matthew@matthew-Aspire-E1-572:p2$ exit
+
+Script done on Tue 20 Oct 2015 12:53:26 PM PDT

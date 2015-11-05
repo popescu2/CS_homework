@@ -1,0 +1,130 @@
+Script started on Tue 20 Oct 2015 12:54:08 PM PDT
+]0;matthew@matthew-Aspire-E1-572: p2matthew@matthew-Aspire-E1-572:p2$ blitz os -g
+Beginning execution...
+====================  KPL PROGRAM STARTING  ====================
+Example Thread-based Programs...
+Initializing Thread Scheduler...
+Plato
+    Sartre
+        Kant
+            Nietzsche
+                Aristotle
+.   .   .   .   .   
+    .   .   .   .   
+E   .   .   .   .   
+.   .   .   .   .   
+    .   .   .   .   
+E   .   .   .   .   
+E       .   .   .   
+E           .   .   
+E       E   .   .   
+E       E       .   
+.       E       .   
+.       E           
+.       E       E   
+.       .       E   
+        .       E   
+    E   .       E   
+    E           E   
+    E           .   
+    .           .   
+    .       E   .   
+    .       E       
+E   .       E       
+E           E       
+.           E       
+.           .       
+.   E       .       
+    E       .       
+    E               
+    E       E       
+    E       .       
+    .       .       
+    .       .   E   
+    .           E   
+    .           .   
+                .   
+    E           .   
+    E       E   .   
+    .       E   .   
+    .       .   .   
+            .   .   
+    E       .   .   
+    E       .       
+    E       .   E   
+    E           E   
+    E           .   
+    .           .   
+    .       E   .   
+    .       E       
+E   .       E       
+E           E       
+.           E       
+.           .       
+.   E       .       
+    E       .       
+    E               
+    E       E       
+    E       .       
+    .       .       
+    .       .   E   
+    .           E   
+                E   
+    E           E   
+    E           .   
+    E               
+    E           E   
+    .           E   
+                E   
+    E           E   
+    .           E   
+    .           .   
+    .   E       .   
+    .   E           
+    .   E       E   
+    .   .       E   
+    .   .       .   
+    .   .   E   .   
+    .   .   E       
+    .   .   .       
+    .       .       
+    .   E   .       
+    .   E   .   E   
+    .   E       E   
+    .   E       .   
+    .   .       .   
+E   .   .       .   
+E   .           .   
+E   .   E       .   
+.   .   E       .   
+.   .   .       .   
+    .   .       .   
+E   .   .       .   
+E   .   .   E   .   
+.   .   .   E   .   
+.   .   .   .   .   
+    .   .   .   .   
+E   .   .   .   .   
+.   .   .   .   .   
+.   .       .   .   
+.   .   E   .   .   
+.   .   .   .   .   
+.   .       .   .   
+.   .   E   .   .   
+.   .   .   .   .   
+.   .       .   .   
+.   .   E   .   .   
+.   .   .   .   .   
+
+*****  A 'wait' instruction was executed and no more interrupts are scheduled... halting emulation!  *****
+
+Done!  The next instruction to execute will be:
+000EC8: 09000000       ret     
+Number of Disk Reads    = 0
+Number of Disk Writes   = 0
+Instructions Executed   = 418786
+Time Spent Sleeping     = 0
+    Total Elapsed Time  = 418786
+]0;matthew@matthew-Aspire-E1-572: p2matthew@matthew-Aspire-E1-572:p2$ exit
+
+Script done on Tue 20 Oct 2015 12:54:16 PM PDT
