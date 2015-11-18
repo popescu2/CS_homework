@@ -378,7 +378,17 @@ code Kernel
       ----------  Condition . Init  ----------
 
       method Init ()
+		  sema = new Semaphore
+		  sema.Init(0)
+		  semaNext = new Semaphore
+		  semaNext.Init(0)
+		  c = 0
+		  nextC = 0
           waitingThreads = new List [Thread]
+
+		  waitingThreads2 = new List [Thread]
+		  mLock = new Mutex
+		  mLock.Init()
         endMethod
 
       ----------  Condition . Wait  ----------
@@ -397,7 +407,54 @@ code Kernel
           oldIntStat = SetInterruptsTo (oldIntStat)
         endMethod
 
+/*
+
+
+	-- this is my attempted code for implementing hoare sematantics.
+	-- i wasn't able to make it work, so i just left the mesa semantics
+	-- to run the tests you guys needed.
+
+	  method Wait(mutex: ptr to Mutex)
+		var
+			oldStat: int
+		--	t: ptr to Thread
+
+		oldStat = SetInterruptsTo (DISABLED)
+		waitingThreads.AddToEnd(currentThread)
+		oldStat = SetInterruptsTo(oldStat)
+		
+		c = c+1
+		if nextC > 0
+			semaNext.Up()
+		else
+			mutex.Unlock()
+		endIf
+		--mutex.Unlock()
+		sema.Down()
+		c = c - 1
+
+	  endMethod
+*/
+/*
+	  method Wait(mutex: ptr to Mutex)
+        var
+            oldIntStat: int
+		mLock.Lock()
+
+		oldIntStat = SetInterruptsTo (DISABLED)
+
+		waitingThreads.AddToEnd(currentThread)
+		mutex.Unlock()
+		currentThread.Sleep()		
+		mutex.Lock()
+		
+		oldIntStat = SetInterruptsTo (oldIntStat)
+
+		mLock.Unlock()	
+	  endMethod
+*/
       ----------  Condition . Signal  ----------
+
 
       method Signal (mutex: ptr to Mutex)
           var
@@ -410,11 +467,38 @@ code Kernel
           t = waitingThreads.Remove ()
           if t
             t.status = READY
-            readyList.AddToEnd (t)
+            readyList.AddToFront (t)
           endIf
           oldIntStat = SetInterruptsTo (oldIntStat)
+		  currentThread.Yield()
         endMethod
 
+/*
+
+	-- this is my attempted code for implementing hoare sematantics.
+	-- i wasn't able to make it work, so i just left the mesa semantics
+	-- to run the tests you guys needed.
+
+	  method Signal (mutex: ptr to Mutex)
+		var
+			oldIntStat: int
+			t: ptr to Thread
+		
+        if ! mutex.IsHeldByCurrentThread ()
+        	FatalError ("Attempt to signal a condition when mutex is not held")
+		endIf
+				
+        oldIntStat = SetInterruptsTo (DISABLED)
+        t = waitingThreads.Remove ()
+        if t
+        	t.status = READY
+       		readyList.AddToFront (t)
+        endIf
+        oldIntStat = SetInterruptsTo (oldIntStat)
+		currentThread.Yield()
+
+	  endMethod
+*/
       ----------  Condition . Broadcast  ----------
 
       method Broadcast (mutex: ptr to Mutex)
@@ -743,6 +827,7 @@ code Kernel
         --
 		var
 			t: ptr to Thread
+		
 		ThreadLock.Lock()
 		
 		--wait for a thread to become available

@@ -151,6 +151,12 @@ header Kernel
   class Condition
     superclass Object
     fields
+	  mLock: Mutex
+	  semaNext: Semaphore
+	  sema: Semaphore
+	  c: int
+	  nextC: int
+	  waitingThreads2: List [Thread]
       waitingThreads: List [Thread]
     methods
       Init ()

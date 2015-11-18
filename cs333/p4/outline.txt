@@ -1,0 +1,18 @@
+
+Wait()
+	lock.Unlock()
+
+	sem1.Down()
+
+
+
+Signal()
+	
+	
+
+
+
+
+
+
+

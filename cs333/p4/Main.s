@@ -381,9 +381,9 @@ _Label_33:
 	.import	_CheckVersion_P_List_
 	cmp	r1,0
 	bne	_Label_34
-! Make sure _P_Kernel_ has hash value 0xab7e3687 (decimal -1417791865)
+! Make sure _P_Kernel_ has hash value 0x1c841835 (decimal 478418997)
 	set	_packageName,r2
-	set	0xab7e3687,r3
+	set	0x1c841835,r3
 	call	_CheckVersion_P_Kernel_
 	.import	_CheckVersion_P_Kernel_
 	cmp	r1,0
@@ -437,9 +437,9 @@ _Label_480:
 	mov	23,r13		! source line 23
 	mov	"\0\0AS",r10
 !   NEW CLASS Constructor...
-!   ZeroMemory: _P_Kernel_processManager = zeros  (sizeInBytes=1316)
+!   ZeroMemory: _P_Kernel_processManager = zeros  (sizeInBytes=1476)
 	set	_P_Kernel_processManager,r4
-	mov	329,r3
+	mov	369,r3
 _Label_481:
 	store	r0,[r4]
 	add	r4,4,r4
@@ -467,9 +467,9 @@ _Label_481:
 	mov	27,r13		! source line 27
 	mov	"\0\0AS",r10
 !   NEW CLASS Constructor...
-!   ZeroMemory: _P_Kernel_threadManager = zeros  (sizeInBytes=41696)
+!   ZeroMemory: _P_Kernel_threadManager = zeros  (sizeInBytes=41776)
 	set	_P_Kernel_threadManager,r4
-	mov	10424,r3
+	mov	10444,r3
 _Label_482:
 	store	r0,[r4]
 	add	r4,4,r4
@@ -497,9 +497,9 @@ _Label_482:
 	mov	31,r13		! source line 31
 	mov	"\0\0AS",r10
 !   NEW CLASS Constructor...
-!   ZeroMemory: _P_Kernel_frameManager = zeros  (sizeInBytes=56)
+!   ZeroMemory: _P_Kernel_frameManager = zeros  (sizeInBytes=136)
 	set	_P_Kernel_frameManager,r4
-	mov	14,r3
+	mov	34,r3
 _Label_483:
 	store	r0,[r4]
 	add	r4,4,r4
