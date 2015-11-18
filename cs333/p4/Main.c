@@ -111,7 +111,7 @@ code Main
       -- Run more thorough tests.
       RunThreadManagerTests ()
       RunProcessManagerTests ()
-      --RunFrameManagerTests ()
+      RunFrameManagerTests ()
 
       RuntimeExit ()
 

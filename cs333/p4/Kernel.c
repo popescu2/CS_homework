@@ -1082,13 +1082,13 @@ code Kernel
 		
 		-- loop and look for and assign free frames
 		for i = 0 to numFramesNeeded -1
-			freeFrame = framesInUse.FindAndSet()
+			freeFrame = framesInUse.FindZeroAndSet()
 			frameAddr = PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME + (freeFrame * PAGE_SIZE)
 
 			aPageTable.SetFrameAddr(i, frameAddr)		
 		endFor	
 
-		numFreeFrames = numFreeFrames - numFramesNeeded
+		numberFreeFrames = numberFreeFrames - numFramesNeeded
 		aPageTable.numberOfPages = numFramesNeeded
 	
 		frameManagerLock.Unlock()
@@ -1102,13 +1102,20 @@ code Kernel
 			i: int
 			addr: int
 			bitNumber: int	
+			numReturn: int
+
 		frameManagerLock.Lock()
-		for i=0 to aPageTable.numberOfPages -1
-			addr = aPageTable.ExtractFrameAddress(i)	
+		numReturn = aPageTable.numberOfPages
+		for i=0 to numReturn -1
+			addr = aPageTable.ExtractFrameAddr(i)	
 			bitNumber = (addr - PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME)/PAGE_SIZE	
-			
+			framesInUse.ClearBit(bitNumber)	
 		endFor		
 	
+		numberFreeFrames = numberFreeFrames + numReturn
+
+		newFramesAvailable.Broadcast(&frameManagerLock)
+
 		frameManagerLock.Unlock()
 
         endMethod
