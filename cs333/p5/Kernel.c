@@ -1942,8 +1942,16 @@ code Kernel
       -- NOT IMPLEMENTED
 	  --var
 		--oldIntStat: int
+		var
+			str: array [100] of char = new array of char{100 of ' '} 
+			success: int
+	  success = currentThread.myProcess.addrSpace.GetStringFromVirtual(&str, filename asInteger,100)
 	  print("Handle_Sys_Exec Invoked! \n")
-	  print(filename)
+	  print("Virt addr of filename is ")
+	  printHex(filename asInteger)
+	  nl()
+	  print("filename: ")
+	  print(&str)
 	  nl() 
       return 3000
     endFunction
@@ -1952,9 +1960,16 @@ code Kernel
 
   function Handle_Sys_Create (filename: ptr to array of char) returns int
       -- NOT IMPLEMENTED
+		var
+			str: array [100] of char = new array of char{100 of ' '} 
+			success: int
+	  success = currentThread.myProcess.addrSpace.GetStringFromVirtual(&str, filename asInteger,100)
 	  print("Handle_Sys_Create invoked! \n")
 	  print("Virtual address of filename: ")
 	  printHex(filename asInteger)
+	  nl()
+	  print("filename: ")
+	  print(&str)
 	  nl()
       return 4000
     endFunction
@@ -1963,7 +1978,17 @@ code Kernel
 
   function Handle_Sys_Open (filename: ptr to array of char) returns int
       -- NOT IMPLEMENTED
+		var
+			str: array [100] of char = new array of char{100 of ' '} 
+			success: int
+	  success = currentThread.myProcess.addrSpace.GetStringFromVirtual(&str, filename asInteger,100)
 	  print("Handle_SYs_Open invoked! \n")
+	  print("Virt addr of filename is ")
+	  printHex(filename asInteger)
+	  nl()
+	  print("filename: ")
+	  print(&str)
+	  nl()
       return 5000
     endFunction
 
@@ -1971,16 +1996,24 @@ code Kernel
 
   function Handle_Sys_Read (fileDesc: int, buffer: ptr to char, sizeInBytes: int) returns int
       -- NOT IMPLEMENTED
+	  -- var
+	  --	str: array [100] of char = new array of char{100 of ' '} 
+	  --	success: int
+	  --success = currentThread.myProcess.addrSpace.GetStringFromVirtual(&str, buffer asInteger,100)
+
 	  print("Handle_Sys_Read invoked! \n")
 	  print("file Desc: ")
 	  printInt(fileDesc)
 	  nl()
-	  print("buffer: ")
+	  print("virt address of buffer: ")
+	  printHex(buffer asInteger)
+	  nl()
 	  -- do stuff here...
 
 	  -- must translate the location of the user's logical address to 
 	  -- something that I will know.
-
+	  -- turns out there's a function for that! Huh!
+      
 	  print("sizeInBytes: ")
 	  printInt(sizeInBytes)
 	  nl() 
@@ -1991,14 +2024,19 @@ code Kernel
 
   function Handle_Sys_Write (fileDesc: int, buffer: ptr to char, sizeInBytes: int) returns int
     -- NOT IMPLEMENTED
+	--	var
+	--		str: array [100] of char = new array of char{100 of ' '} 
+	--		success: int
+	--  success = currentThread.myProcess.addrSpace.GetStringFromVirtual(&str, buffer asInteger,100)
 	print("Handle_Sys_Write invoked! \n")
 	print("fileDesc: ")
 	printInt(fileDesc)
 	nl()
-	print("buffer: ")
+	print("virt address of buffer: ")
+	printHex(buffer asInteger)
+	nl()
 	--do stuff here	
 
-	nl()
 	print("sizeInBytes: ")
 	printInt(sizeInBytes)
 	nl()
