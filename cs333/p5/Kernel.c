@@ -1945,14 +1945,53 @@ code Kernel
 		var
 			str: array [100] of char = new array of char{100 of ' '} 
 			success: int
+			newaddrSpace: AddrSpace = new AddrSpace
+			openFile: ptr to OpenFile
+			initPC: int
+			initSystemStackTop: ptr to int
+			initUserStackTop: int
+			oldIntStat: int
+	  oldIntStat = SetInterruptsTo(DISABLED)
 	  success = currentThread.myProcess.addrSpace.GetStringFromVirtual(&str, filename asInteger,100)
-	  print("Handle_Sys_Exec Invoked! \n")
-	  print("Virt addr of filename is ")
-	  printHex(filename asInteger)
-	  nl()
-	  print("filename: ")
-	  print(&str)
-	  nl() 
+	  
+	  -- For debugging purposes, uncomment the following prints.
+	  -- it's similar format to the other system calls.
+	  --print("Handle_Sys_Exec Invoked! \n")
+	  --print("Virt addr of filename is ")
+	  --printHex(filename asInteger)
+	  --nl()
+	  --print("filename: ")
+	  --print(&str)
+	  --nl() 
+
+	  openFile = fileManager.Open(&str)
+	  if openFile == null
+		return -1
+	  endIf
+
+	  newaddrSpace.Init()
+
+	  initPC = openFile.LoadExecutable(&newaddrSpace)
+	  fileManager.Close(openFile)
+
+	  if initPC == -1
+	  	return -1	
+	  endIf
+	  -- free all previously used frames!
+	  frameManager.ReturnAllFrames(&currentThread.myProcess.addrSpace)
+	
+	  initUserStackTop = ((newaddrSpace.numberOfPages) * PAGE_SIZE)
+	  
+	  initSystemStackTop = & currentThread.systemStack[SYSTEM_STACK_SIZE -1]
+	  newaddrSpace.SetToThisPageTable()
+
+	  -- assign our newly created addrspace to our old thread's process
+	  currentThread.myProcess.addrSpace = newaddrSpace
+	  
+	  currentThread.isUserThread = true
+	  BecomeUserThread(initUserStackTop, initPC, initSystemStackTop asInteger)
+	  -- Anything after this should NEVER HAPPEN!   
+	  
       return 3000
     endFunction
 
@@ -2871,8 +2910,8 @@ code Kernel
           endIf
           frameManager.GetNewFrames (addrSpace, i)
 
-           print ("LoadExecutable: The address space just allocated...\n")
-           addrSpace.Print ()
+           -- print ("LoadExecutable: The address space just allocated...\n")
+           -- addrSpace.Print ()
 
           -- Read and check the separator...
           if  self.ReadInt () != 0x2a2a2a2a
