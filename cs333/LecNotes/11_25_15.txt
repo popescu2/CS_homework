@@ -1,0 +1,178 @@
+Managing Free blocks
+	Approach 1: keep a bitmap.
+		1 bit per disk block.
+		
+	Approach 2: keep a free list
+		Some kind of linked list of free blocks.
+		each block on disk holds a bunch of addresses of free blocks
+			address of next block in the list.
+	
+2 kinds of blocks.
+	free blocks
+	block containing pointers to free blocks.
+
+always keep on block of pointers in memory.
+	this block may be partially full
+
+To return a block to the free list:
+	if the block of pointers (in memory) is not full, add X to it.
+	if the block of pointers (in memory) is full
+		write it out to the disk
+		start a new block in memory
+		use block X itself for a pointer block.
+
+	Problem:
+	slow when accessing last block in the list.
+
+	Solution? Try to keep the block in memory about 0.5 full.
+		when it fills up, break it into 2 blocks. Write one out to disk.
+
+Optimization for Disks is based more on user experience, not based on time or space.
+
+Comparison: Free list vs Bitmap
+Desirable: Keep all the blocks in one file close together.
+	If you want to optimize your Filesystem, do NOT use a linked list.
+	
+	Free lists: Free blocks are all over the disk
+	allocation comes from (almost) random location
+
+	Bimaps: Much easier to find a free block "close to" a given position
+		bitmap impoementation:
+			keep 2 Mbyte bitmap in memory
+			keep only one block of bitmap in memory at a time.
+
+	
+
+FILE SYSTEMS!!!
+
+Must store large amounts of data.
+Data must survive the termination of the process that created it.
+	called "persistence"
+
+Multiple processes must be able to access the information concurrently.
+
+What is a file?
+	files can be structured or unstructured
+	unstructured: just a sequence of bytes
+	Structured: a sequence or tree of typed records.
+
+in unix based operating systems, a file is an unstructured sequence of bytes.
+
+file extensions:
+Even though files are just a sequence of bytes, programs can impose structure on them by convention.
+	Files with a certain standard structure imposed can be identified using an extension to their name.
+	Application programs may look for specific file extensions to indicate the file's type.
+	But as far as the operating system is concerned its just a sequence of bytes.
+
+Executable files
+	the os must understand the format of executable files in order to  execute programs
+	The exec system call needs this:
+		Put program and data in process address space.
+
+File attributes
+	various metadata needs to be associated with files
+		owner
+		creation time
+		access permissions/protections
+		size etc.
+
+	this metadata is called the file attributes
+		maintained in file system data structures for each file.
+
+	
+File access models
+	sequential access
+		read all bytes/records from the beginning
+		cannot jump around (but could reqind or back up) convenient when medium was magnetic tape
+	random access
+		can read byts or records in any order
+		move position (seek), then read.
+
+READING/WRITING
+
+
+File bytes vs Disk sectors
+Files are sequences of bytes
+	granularity of file IO is bytes.
+Disks are arrays of sectors (512 bytes)
+	granularity of disk IO is sectors
+	files data must be stored in sectors
+File sytems define a block size
+	Block size = 2^n * sector size.
+	example: Contiguous allocation
+		Simple to implement
+		performance is good (for sequential reading)
+	
+		But! After deletions, disk becomes fragmented.
+		will need periodic compaction 
+		will need to manage free lists
+		if new file put at end of disk no problem
+		if new file is put into a "hole"
+			must know a file's maximum possible size at the time it is created!!
+		
+		Good for CD roms.
+			all file sizes are known in advance
+			files are never deleted.
+
+	What about linked list allocation?
+		random access into the file is SLOW!!
+	
+	File allocation Table! (FAT)
+	Keep a table in memory.
+	One entry per block on the disk.
+	each entry contains the address of the "next" block
+	
+	Random access....search the linked list (but all in memory)
+	Directory entry needs only one number
+		starting block number.
+
+	Disadvantage
+		The entire table must be in memory all at once!
+		A problem for large file systems.
+
+		Example:
+			200 GB disk size
+			1 KB block size
+			4 bytes = FAT entry size
+			800 MB of memory used to store the FAT.
+
+	Solution? I-nodes
+		each i-node is a structure containing info about the file
+		attributes and location of the blocks containing the file.
+		
+	Single indirection/double/triple
+
+	
+Single level directories
+	sometimes caled folders.
+	not practical for same name files
+
+Two-level directories
+	each user has a directory.
+	so each user may have the same "name" for a file, but they are unique within the filesystem.
+	
+	So in a tree filesystem thing, all FILES are leaves, but not all LEAVES are FILES.
+	you may have an empty directory. 
+
+	LINKS! hard/soft
+	file is shared logically by two different directories.
+	D        Both E and D share file "b"
+	\     E
+	 \   /
+	  \ /
+	   b				
+
+	What if the file changes?
+	New disk blocks are used. Better not store this info in the directories!!
+
+	Store the info with the files, not the directory!
+	
+	Hard links: both directories point to the same i-node
+
+	symbolic (soft) links: one directory points to the file's inode
+							other directory contains the file's "path"!!!
+
+	
+DELETING!!!
+
+	 	

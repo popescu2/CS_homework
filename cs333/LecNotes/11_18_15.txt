@@ -1,0 +1,124 @@
+
+Persistence:
+	saving data for long term is desirable.
+	The dominant device is the hard dsk drive.
+	
+Several options for managing the IO.
+	Programmed IO
+		nonstop polling until IO is done. "are you done? are you done? are you done?
+	interrupts
+		stops the process and waits until the IO is done. IO will signal the CPU when he is done.
+		complicates design of OS. Must account for race conditions/concurrency problems.
+		needs to copy data to controller first. Then switch to IO
+	Direct memory access (DMA)
+		expanded window for concurrency. CPU goes to another process while copy data to concurrency.
+		Then it does the IO (while still in another process) *concurrency checking*
+		Then it returns
+
+Principles of IO software
+	Device independence
+		Programs can access any IO device.
+		Hard drive, cdRom, floppy
+	Uniform Naming
+		Devices are named with simple strings
+		Names should not depend on the device.
+	Error handling
+
+	Synchonous vs asynchronous transfers.
+		Process is blocked vs interrupt-driven or polling approaches.
+		
+	Buffering
+		Data comes off a device.
+		May not know the final destination of the data
+		e.g., a network packet....Where to put it??
+	Sharable vs. Dedicated Devices
+		Disk should be sharable
+		Keyboard, screen dedicated to one process at any one time...
+	
+Software engineering Challenges
+
+	how to remove the complexities of IO handling form application programs?
+		Standard IO APIs (libraries and system calls)
+	How to support a wide range of device types on a wide range of operating systems?
+		standard interfaces for device drivers (DDI)
+		standard/published intefaces for access to kernel facilities
+			DKI: driver-kernel interface
+	
+Interrupt Handling
+	IO Device Driver starts the operation
+		then blocks until an interrupt occurs.
+		Then it wakes up, finishes, and returns
+	The interrupt Handler
+		Does whatever is immediately necessary
+		then unblocks the driver
+	Example: The BLITZ "DiskDriver"
+		Start IO and block (waits on semaphore)
+		Interrupt routine signals the semaphore & returns	
+		
+Top and Bottom halves
+	interrupt handers are divided into scheduled and non sheduled tasks.
+	nonscheduled tasks execute immediately on interrupt and run in the context of the interrupted thread (bottom half)
+		There is no VM context switch.
+		They should do a miimum amount of work so as not to disrupt progress of interrupted thread
+		They should minimize time during which interrupts are disabled.
+	Scheduled tasks are queued for processing by a thread (upper half)
+		this thread will be scheduled to run later
+		may be scheduled preemptively or nonpreemptively.s
+
+Interrupt handler's jobs
+	Set up stack for interrupt sevice routine (ISR)
+	ACK interrupt controller, re-enable interrupts (ack = acknowledgement) nack= negative ack
+	Copy registers from saved location
+	Run the correct interrupt servive routine
+
+Communicating across IO layers
+	|x| . \
+	|x|  . \
+	|x|	  . \
+	|x|	   . \
+>>>>>>>>>>>>>>>>>	
+	|x|    . /
+	|x|   . /
+	|x|  . /
+	|x| . /
+
+Programmable Timer
+	One Shot mode:
+		counter initialized then decremented until zero
+		At zero a single interrupt occurs
+	Square wave mode:
+		At zero the counter is reinitialized with the same value
+		Periodic interrupts (called "clock ticks") occur
+
+****
+TIME
+****
+
+Goals of TImer Software
+
+	Maintain time of day
+		Must update the time of day every tick
+	Prevent process from running too long
+	Account for CPU usage
+		separate timer for every process
+		Charge each tick to the current process
+	Handling the "Alarm" syscall
+		user programs ask to be sent a signal at a given time.
+	Providing watchdog Timers for the OS itself
+		when to stop the disk, switch to low power mode, etc
+	Doing profiling, monitoring, and statistics gathering
+
+Software timers
+	A process can ask for notification (alarm) at time T
+		At time T, the OS will signal the process
+	Proces can "go to sleep until time T"
+	Several process can have active timers
+	The CPU has only one clock
+		must service the "alarms" in the right order
+	Keep a sorted list of all timers
+		each entry tells when the alarm goes off and what to do.
+	
+
+
+
+
