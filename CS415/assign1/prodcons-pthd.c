@@ -9,6 +9,7 @@
 int num_threads;
 int total_tasks_completed=0;
 struct queue_ * tasks = NULL;
+long * arrCompletedTasks;
 pthread_mutex_t queueLock;
 pthread_cond_t prodCond;
 pthread_cond_t consCond;
@@ -64,10 +65,10 @@ void producer(long tid) {
 
 }
 
-void consumer(long tid) {
+void * consumer(long tid) {
     printf("Consumer[%ld] starting on core %d\n", tid, sched_getcpu()); 
 
-    int completed_tasks = 0;
+    long completed_tasks = 0;
     struct task_ * extracted = NULL;
 
     //loop until heat death of the universe... :D
@@ -84,10 +85,10 @@ void consumer(long tid) {
              
             // check total tasks
             if (total_tasks_completed >= 100) {
-                printf("Consumer[%ld] consumed <%d> total tasks\n", tid, completed_tasks);
+                printf("Consumer[%ld] consumed <%ld> total tasks\n", tid, completed_tasks);
                 pthread_mutex_unlock(&queueLock);
                 
-                return;
+                return (void*) completed_tasks;
             }
             pthread_cond_wait(&consCond, &queueLock);
             extracted = remove_task(tasks);
@@ -131,6 +132,7 @@ int main(int argc, char * argv[]) {
     printf("running program with %d consumer threads...\n", num_threads);
 
     
+
     //init the task queue
     tasks = init_queue(20);
 
@@ -157,11 +159,30 @@ int main(int argc, char * argv[]) {
     
     //-----------------------------------
     pthread_join(producer_thread, NULL);
+    
+    arrCompletedTasks = malloc(sizeof(long) * num_threads);
+    void * retval;
 
     for (k = 0; k < num_threads; k++) {
 
-        pthread_join(consumer_threads[k], NULL);
+        pthread_join(consumer_threads[k], &retval);
+        arrCompletedTasks[k] = (long) retval;
     }
+
+    int remaining = num_threads %4;
+    num_threads = num_threads - remaining;
+    for (k = 0; k < num_threads/4; k+=4) {
+        printf("C[%2d]:%2d, ", k, arrCompletedTasks[k]);
+        printf("C[%2d]:%2d, ", k+1, arrCompletedTasks[k+1]);
+        printf("C[%2d]:%2d, ", k+2, arrCompletedTasks[k+2]);
+        printf("C[%2d]:%2d, \n", k+3, arrCompletedTasks[k+3]);
+    }
+
+    for (k = num_threads; k < (num_threads+remaining); k++) {
+        
+        printf("C[%2d]:%2d, ", k, arrCompletedTasks[k]);
+    }
+
 
     return 1; 
 }
