@@ -131,6 +131,7 @@ void * consumer(long tid) {
 
 int main(int argc, char * argv[]) {
 
+    printf("Main: started ...\n");
     //Check command args. Optional amount of threads.
     num_threads = 1;
     if (argc == 2) {
@@ -168,7 +169,6 @@ int main(int argc, char * argv[]) {
 
     //The threads starting.... ----------
     long k;
-    pthread_create(&producer_thread, NULL, (void *)producer, &producer_thread);
     
     int nprocs = sysconf(_SC_NPROCESSORS_ONLN);
     cpu_set_t cpuset;
@@ -181,6 +181,7 @@ int main(int argc, char * argv[]) {
         pthread_setaffinity_np(consumer_threads[k], sizeof(cpu_set_t), &cpuset);
     }
 
+    pthread_create(&producer_thread, NULL, (void *)producer, &producer_thread);
     
     //-----------------------------------
     pthread_join(producer_thread, NULL);
@@ -203,6 +204,7 @@ int main(int argc, char * argv[]) {
     int remaining = num_threads % 4;
     int mod_threads = num_threads - remaining;
 
+    printf("Task count across threads:\n");
     for (k = 0; k < mod_threads; k+=4) {
         //printf("C[%*ld]: %ld, ", 2, k, arrCompletedTasks[k]); 
         //printf("C[%*ld]: %ld, ", 2, k+1, arrCompletedTasks[k+1]); 
