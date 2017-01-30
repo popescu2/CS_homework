@@ -42,7 +42,6 @@ void producer(long tid) {
 
             task = create_task(i+1, i+1);
             add_task(tasks, task);
-            pthread_cond_broadcast(&consCond);
 
         }
         else {
@@ -56,10 +55,10 @@ void producer(long tid) {
             }
             task = create_task(i+1,i+1);
             add_task(tasks, task);
-            pthread_cond_broadcast(&consCond);
 
         }
 
+        pthread_cond_broadcast(&consCond);
         //unlock queue for consumers to MAYBE jump in.
         pthread_mutex_unlock(&queueLock);
         // -------------------------------------------
@@ -88,27 +87,37 @@ void * consumer(long tid) {
 
         pthread_mutex_lock(&queueLock);
         extracted = remove_task(tasks);
-        pthread_mutex_unlock(&queueLock);
+        //pthread_mutex_unlock(&queueLock);
 
 
         while (extracted == NULL) {
              
             // check total tasks
+            //pthread_mutex_lock(&countLock);
             if (total_tasks_completed >= 100) {
                 //printf("Consumer[%ld] consumed <%ld> total tasks\n", tid, completed_tasks);
                 
-                //pthread_mutex_unlock(&queueLock);
+                pthread_mutex_unlock(&countLock);
+                pthread_mutex_unlock(&queueLock);
                 printf("Consumer[%ld] ending\n", tid);
                  
+                pthread_cond_broadcast(&consCond);
                 return (void*) completed_tasks;
             }
+            
+            //pthread_mutex_unlock(&countLock);
 
-            pthread_mutex_lock(&queueLock);
+
+            printf("consumer [%ld] waiting on task %d\n", tid, total_tasks_completed);
+            pthread_cond_wait(&consCond, &queueLock);
+            //pthread_mutex_lock(&queueLock);
             extracted = remove_task(tasks);
-            pthread_mutex_unlock(&queueLock);
+            //pthread_mutex_unlock(&queueLock);
         }
 
-        //printf("Consumer[%ld] consumed task %d\n", tid, extracted->low);
+        pthread_mutex_unlock(&queueLock);
+
+        printf("Consumer[%ld] consumed task %d\n", tid, extracted->low);
         pthread_mutex_lock(&countLock);
         total_tasks_completed++;
         pthread_mutex_unlock(&countLock);
