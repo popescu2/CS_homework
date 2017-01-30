@@ -4,6 +4,7 @@
 #include <sched.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 
 int num_threads;
@@ -11,6 +12,7 @@ int total_tasks_completed=0;
 struct queue_ * tasks = NULL;
 long * arrCompletedTasks;
 pthread_mutex_t queueLock;
+pthread_mutex_t countLock;
 pthread_cond_t prodCond;
 pthread_cond_t consCond;
 
@@ -45,14 +47,17 @@ void producer(long tid) {
         }
         else {
             
-            printf("Created 20 tasks... \n");
-            
+            //printf("Created 20 tasks... \n");
             while(tasks->length >= 20) {
                 pthread_cond_wait(&prodCond, &queueLock);
-                task = create_task(i+1,i+1);
-                add_task(tasks, task);
-                pthread_cond_broadcast(&consCond);
+                //task = create_task(i+1,i+1);
+                //add_task(tasks, task);
+                //pthread_cond_broadcast(&consCond);
             }
+            task = create_task(i+1,i+1);
+            add_task(tasks, task);
+            pthread_cond_broadcast(&consCond);
+
         }
 
         //unlock queue for consumers to MAYBE jump in.
@@ -61,6 +66,8 @@ void producer(long tid) {
 
 
     }
+
+    printf("Producer ending\n");
 
 
 }
@@ -72,36 +79,46 @@ void * consumer(long tid) {
     struct task_ * extracted = NULL;
 
     //loop until heat death of the universe... :D
-    while (((4*3) + 7) == ((15/3) + 14)) {
+    while (1) {
         
         //Lock queue -----------------------
-        pthread_mutex_lock(&queueLock);
         //----------------------------------
         
-        printf("Consumer[%ld] acquired the lock\n", tid); 
+        //printf("Consumer[%ld] acquired the lock\n", tid); 
 
+        pthread_mutex_lock(&queueLock);
         extracted = remove_task(tasks);
+        pthread_mutex_unlock(&queueLock);
+
+
         while (extracted == NULL) {
              
             // check total tasks
             if (total_tasks_completed >= 100) {
-                printf("Consumer[%ld] consumed <%ld> total tasks\n", tid, completed_tasks);
-                pthread_mutex_unlock(&queueLock);
+                //printf("Consumer[%ld] consumed <%ld> total tasks\n", tid, completed_tasks);
                 
+                //pthread_mutex_unlock(&queueLock);
+                printf("Consumer[%ld] ending\n", tid);
+                 
                 return (void*) completed_tasks;
             }
-            pthread_cond_wait(&consCond, &queueLock);
+
+            pthread_mutex_lock(&queueLock);
             extracted = remove_task(tasks);
+            pthread_mutex_unlock(&queueLock);
         }
 
-        printf("Consumer[%ld] consumed task %d\n", tid, extracted->low);
+        //printf("Consumer[%ld] consumed task %d\n", tid, extracted->low);
+        pthread_mutex_lock(&countLock);
         total_tasks_completed++;
-        printf("  Total tasks consumed: %d\n", total_tasks_completed);
+        pthread_mutex_unlock(&countLock);
+        
+        //printf("  Total tasks consumed: %d\n", total_tasks_completed);
         completed_tasks++;
 
 
         // Unlock queue --------------------
-        pthread_mutex_unlock(&queueLock);
+        //pthread_mutex_unlock(&queueLock);
         //----------------------------------
 
         //We consumed a thing, so might as well signal the producer to TRY
@@ -138,6 +155,7 @@ int main(int argc, char * argv[]) {
 
     //The lock init and cond init
     pthread_mutex_init(&queueLock, NULL);
+    pthread_mutex_init(&countLock, NULL);
     pthread_cond_init(&prodCond, NULL);
     pthread_cond_init(&consCond, NULL);
 
@@ -152,8 +170,15 @@ int main(int argc, char * argv[]) {
     long k;
     pthread_create(&producer_thread, NULL, (void *)producer, &producer_thread);
     
+    int nprocs = sysconf(_SC_NPROCESSORS_ONLN);
+    cpu_set_t cpuset;
+    int cid = 0;
     for (k = 0; k < num_threads; k++) {
+        
         pthread_create(&consumer_threads[k], NULL, (void *) consumer, (void*)k);
+        CPU_ZERO(&cpuset);
+        CPU_SET(cid++ % nprocs, &cpuset);
+        pthread_setaffinity_np(consumer_threads[k], sizeof(cpu_set_t), &cpuset);
     }
 
     
@@ -163,26 +188,61 @@ int main(int argc, char * argv[]) {
     arrCompletedTasks = malloc(sizeof(long) * num_threads);
     void * retval;
 
+
+
+
     for (k = 0; k < num_threads; k++) {
 
         pthread_join(consumer_threads[k], &retval);
         arrCompletedTasks[k] = (long) retval;
     }
 
-    int remaining = num_threads %4;
-    num_threads = num_threads - remaining;
-    for (k = 0; k < num_threads/4; k+=4) {
-        printf("C[%2d]:%2d, ", k, arrCompletedTasks[k]);
-        printf("C[%2d]:%2d, ", k+1, arrCompletedTasks[k+1]);
-        printf("C[%2d]:%2d, ", k+2, arrCompletedTasks[k+2]);
-        printf("C[%2d]:%2d, \n", k+3, arrCompletedTasks[k+3]);
+
+
+
+    int remaining = num_threads % 4;
+    int mod_threads = num_threads - remaining;
+
+    for (k = 0; k < mod_threads; k+=4) {
+        //printf("C[%*ld]: %ld, ", 2, k, arrCompletedTasks[k]); 
+        //printf("C[%*ld]: %ld, ", 2, k+1, arrCompletedTasks[k+1]); 
+        //printf("C[%*ld]: %ld, ", 2, k+2, arrCompletedTasks[k+2]); 
+        //printf("C[%*ld]: %ld, ", 2, k+3, arrCompletedTasks[k+3]); 
+        printf("C[%2ld]:%2ld, ", k, arrCompletedTasks[k]);
+        printf("C[%2ld]:%2ld, ", k+1, arrCompletedTasks[k+1]);
+        printf("C[%2ld]:%2ld, ", k+2, arrCompletedTasks[k+2]);
+        printf("C[%2ld]:%2ld, ", k+3, arrCompletedTasks[k+3]);
+        printf("\n");
     }
 
-    for (k = num_threads; k < (num_threads+remaining); k++) {
+    for (k = mod_threads; k < num_threads; k++) {
+        printf("C[%2ld]:%2ld, ", k, arrCompletedTasks[k]); 
+        //printf("C[%*ld]: %ld, ", 2, k, arrCompletedTasks[k]); 
         
-        printf("C[%2d]:%2d, ", k, arrCompletedTasks[k]);
     }
-
+    printf("\n");
+    printf("Total: %d\n", total_tasks_completed);
 
     return 1; 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
