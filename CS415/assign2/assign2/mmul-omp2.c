@@ -38,7 +38,7 @@ int main() {
             stat_arr[omp_get_thread_num()]++;
             c[i][j] = 0.;
             for (k = 0; k < N; k++) {
-                printf("index: c[%d][%d], thread: <%d>\n", i, j, omp_get_thread_num());
+                //printf("index: c[%d][%d], thread: <%d>\n", i, j, omp_get_thread_num());
                 c[i][j] += a[i][k] * b[k][j];
             }
         }
@@ -53,11 +53,13 @@ int main() {
     }
     printf("total = %d (should be 3584)\n", total);
 
+    total = 0;
     printf("\n\nStats ==================\n");
     for(z = 0; z < num_threads; z++) {
         printf("[%2d]:%2d, ", z, stat_arr[z]);
+        total += stat_arr[z];
     }
     printf("\n");
-    printf("Total: %d threads, %d elements\n", num_threads, N*N); 
+    printf("Total: %d threads, %d elements\n", num_threads, total); 
 
 }

@@ -58,13 +58,18 @@ void verify_array(int *array, int N) {
 // Bubble sort for the base cases
 //
 void bubblesort(int *array, int low, int high) {
+    int tid = omp_get_thread_num();
+    stat_arr[tid] += ((high - low) +1);
+    
     if (low >= high) 
         return;
-    printf("Thread %d sorted [%d, %d]\n", omp_get_thread_num(), low, high);
+
+    printf("Thread %d sorted [%d, %d]\n", tid, low, high);
     for (int i = low; i <= high; i++)
         for (int j = i+1; j <= high; j++) 
-            if (array[i] > array[j])
+            if (array[i] > array[j]) {
                 swap(array, i, j);
+            }
 }
 
 // Pick an arbitrary element as pivot. Rearrange array 
@@ -76,6 +81,7 @@ int partition(int *array, int low, int high) {
     int middle = low;
     for(int i = low; i < high; i++)
         if(array[i] < pivot) {
+            
             swap(array, i, middle);
             middle++;
         }
@@ -86,21 +92,24 @@ int partition(int *array, int low, int high) {
 // QuickSort an array range
 // 
 void quicksort(int *array, int low, int high) {
+    int tid = omp_get_thread_num();
+
     if (high - low < MINSIZE) {
         bubblesort(array, low, high);
         return;
     }
     int middle = partition(array, low, high);
+    ++stat_arr[tid];
     printf("Thread %d found middle [%d]\n", omp_get_thread_num(), middle);
-    #pragma omp task firstprivate(middle)
+#pragma omp task firstprivate(middle)
     {
-    if (low < middle)
-        quicksort(array, low, middle-1);
+        if (low < middle)
+            quicksort(array, low, middle-1);
     }
-    #pragma omp task firstprivate(middle)
+#pragma omp task firstprivate(middle)
     {
-    if (middle < high)
-        quicksort(array, middle+1, high);
+        if (middle < high)
+            quicksort(array, middle+1, high);
     }
 }
 
@@ -123,20 +132,35 @@ int main(int argc, char **argv) {
         printf ("num threads must be greater than 0\n");
         exit(0);
     }
-    
+
     printf("num threads = %d\n", numThreads);
     omp_set_num_threads(numThreads);
     //init stat array
     stat_arr = malloc(sizeof(int) * numThreads);
 
+    //init stat array
+    for (int i = 0; i< numThreads; i++) {
+        stat_arr[i] = 0;
+    }
+
     array = init_array(N);
 
     //  printf("Sorting started ...\n");
-    #pragma omp parallel num_threads(numThreads)
-    #pragma omp single
+#pragma omp parallel num_threads(numThreads)
+#pragma omp single
     quicksort(array, 0, N-1);
     //  printf("... completed.\n");
 
     verify_array(array, N);
+
+    int total = 0;
+    printf("\n\nStats ==================\n");
+
+    for(int z = 0; z < numThreads; z++) {
+        printf("[%2d]:%2d, ", z, stat_arr[z]);
+        total += stat_arr[z];
+    }
+    printf("\n");
+    printf("Total: %d threads, %d elements\n", numThreads, total); 
 }
 
