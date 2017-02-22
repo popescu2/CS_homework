@@ -1,0 +1,37 @@
+Script started on Wed 22 Feb 2017 11:36:22 AM PST
+popescu2@ada:[assign3] $ ./mmul -nl 1
+WARNING: Using GASNet's udp-conduit, which exists for portability convenience.
+WARNING: Support was detected for native GASNet conduits: ibv
+WARNING: You should *really* use the high-performance native GASNet conduit
+WARNING: if communication performance is at all important in this program run.
+
+
+Total = 3584(should be 3584)
+popescu2@ada:[assign3] $ ./mmul ==[K[K--N[K[K[K-nl 1 --N=16
+WARNING: Using GASNet's udp-conduit, which exists for portability convenience.
+WARNING: Support was detected for native GASNet conduits: ibv
+WARNING: You should *really* use the high-performance native GASNet conduit
+WARNING: if communication performance is at all important in this program run.
+
+
+Total = 61440(should be 3584)
+popescu2@ada:[assign3] $ ./mmul -nl 1 --N=16[K[K32
+WARNING: Using GASNet's udp-conduit, which exists for portability convenience.
+WARNING: Support was detected for native GASNet conduits: ibv
+WARNING: You should *really* use the high-performance native GASNet conduit
+WARNING: if communication performance is at all important in this program run.
+
+
+Total = 1015808(should be 3584)
+popescu2@ada:[assign3] $ ./mmul -nl 1 --N=32[K[K64
+WARNING: Using GASNet's udp-conduit, which exists for portability convenience.
+WARNING: Support was detected for native GASNet conduits: ibv
+WARNING: You should *really* use the high-performance native GASNet conduit
+WARNING: if communication performance is at all important in this program run.
+
+
+Total = 16515072(should be 3584)
+popescu2@ada:[assign3] $ exit
+exit
+
+Script done on Wed 22 Feb 2017 11:37:07 AM PST

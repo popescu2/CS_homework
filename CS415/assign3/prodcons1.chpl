@@ -30,6 +30,23 @@ module main {
   proc consumer() { 
 
     // ... implement this function ...
+    var task: Task;
+    var total = 0;
+
+    do {
+
+        task = queueRemove();
+
+        if (task.low + task.high == 0) {
+            writeln("consumer got endFlag, total tasks = <", total, ">");
+            return;
+        }
+
+        writeln("consumer removed <", task, "> from queue");
+        total += 1;
+    
+
+    } while (1);
  
   } 
 
