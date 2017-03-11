@@ -120,10 +120,10 @@ int main(int argc, char * argv[]) {
     quicksort(data_buffer, 0, (partition_size)-1);
 
     for (int i = 0; i < partition_size; ++i) {
-        printf("p_%d -> data buffer[%d] = %d\n", rank, i, data_buffer[i]);
+        //printf("p_%d -> data buffer[%d] = %d\n", rank, i, data_buffer[i]);
     }
 
-    //printf("-------------------\n\n");
+    ////printf("-------------------\n\n");
 
     if (P == 1) {
         MPI_File_set_view(outFile, 0, MPI_INT, MPI_INT, "native", MPI_INFO_NULL); 
@@ -143,9 +143,9 @@ int main(int argc, char * argv[]) {
         int part_size = partition_size;
         int piv_size = P-1;
 
-        //printf("DEBUG: bufidx: %d  partition_size: %d\n", buf_idx, partition_size);
+        ////printf("DEBUG: bufidx: %d  partition_size: %d\n", buf_idx, partition_size);
         while (buf_idx < partition_size) {
-            printf("p_%d part_size: %d   piv_size: %d\n", rank, part_size, piv_size);
+            //printf("p_%d part_size: %d   piv_size: %d\n", rank, part_size, piv_size);
             if (part_size <= piv_size) 
                 step = 1;
             else {
@@ -178,9 +178,9 @@ int main(int argc, char * argv[]) {
     MPI_Bcast((void*) pivot_list, P-1, MPI_INT, 0, mcw);
 
     for (int i = 0; i < P-1; ++i) { 
-        printf("p_%d pivot[%d] = %d\n",rank, i, pivot_list[i]);
+        //printf("p_%d pivot[%d] = %d\n",rank, i, pivot_list[i]);
     }
-    printf("-------------------\n\n");
+    //printf("-------------------\n\n");
     
 
     int * part_bucket = calloc((6*N)/P, sizeof(int));
@@ -206,7 +206,7 @@ int main(int argc, char * argv[]) {
         }
         else {
             if (low != -1) {
-                printf("p_%d sending buffer range [%d --> %d] to bucket %d\n", rank, low, high, k);
+                //printf("p_%d sending buffer range [%d --> %d] to bucket %d\n", rank, low, high, k);
                 send_len = (high - low) + 1; 
                 MPI_Send((void*) &send_len, 1,  MPI_INT, k, SIZE, mcw); 
                 MPI_Send((void*) &data_buffer[low], send_len, MPI_INT, k, TAG, mcw);
@@ -224,7 +224,7 @@ int main(int argc, char * argv[]) {
     low = i;
     if (low < partition_size) {
         high = partition_size-1;
-        printf("p_%d sending buffer range [%d --> %d] to bucket %d\n", rank, low, high, k);
+        //printf("p_%d sending buffer range [%d --> %d] to bucket %d\n", rank, low, high, k);
         send_len = (high - low) + 1; 
         MPI_Send((void*) &send_len, 1,  MPI_INT, k, SIZE, mcw); 
         MPI_Send((void*) &data_buffer[low], send_len, MPI_INT, k, TAG, mcw);
@@ -243,7 +243,7 @@ int main(int argc, char * argv[]) {
         ++endcount;
 
         if (recval == -1) {
-            //printf("p_%d received %d end signals\n", rank, endcount);
+            ////printf("p_%d received %d end signals\n", rank, endcount);
         }
         else {
             MPI_Recv(   (void*) &part_bucket[bucket_index],
@@ -255,112 +255,62 @@ int main(int argc, char * argv[]) {
                         &st);
 
             //part_bucket[bucket_index] = recval;
-            bucket_index = recval;
-            printf("p_%d receiving %*s [%2d]\n", rank, rank*4, " ", recval);
+            bucket_index += recval;
+            //printf("p_%d receiving %*s [%2d]\n", rank, rank*4, " ", bucket_index);
         }        
-    }
-
-    /*
-    for (i, k = 0; k < P-1; ) { 
-        if (data_buffer[i] <= pivot_list[k] && i < partition_size) {
-            printf("p_%d sending1 %2d to bucket %*s[%d] from %d\n", 
-                    rank, 
-                    data_buffer[i],
-                    k*2,
-                    "",
-                    k,
-                    i);
-            
-            MPI_Isend((void*) &data_buffer[i], 1, MPI_INT, k, TAG, mcw, &req);
-            ++i; 
-        
-        } else {
-            printf("p_%d sending2 %2d to bucket %*s[%d]\n", rank, -1, k*2,"", k);
-            MPI_Isend((void*) &junk, 1, MPI_INT, k, TAG, mcw, &req);
-            ++k;
-
-        }
-    }
-
-    // send the elements that go in the last bucket
-    //=============================================
-    for ( ; i < partition_size; ++i) {
-            printf("p_%d sending3 %2d to bucket %*s[%d]\n", rank, data_buffer[i], k*2,"", k);
-            
-            MPI_Isend((void*) &data_buffer[i], 1, MPI_INT, k, TAG, mcw, &req);
-        
-    }
-
-    printf("p_%d sending %2d to bucket %*s[%d]\n", rank, junk, k*2,"", k);
-    MPI_Isend((void*) &junk, 1, MPI_INT, k, TAG, mcw, &req);
-
-    */
-
-    /*
-    printf("-------------------\n\n");
-
-    int endcount = 0;
-    while(endcount < P) {
-        int recval = 0;
-        MPI_Irecv((void*) &recval, 1, MPI_INT, MPI_ANY_SOURCE, TAG, mcw, &req); 
-        MPI_Wait(&req, &st);
-        if (recval == -1) {
-            ++endcount;
-        }
-        else {
-            part_bucket[bucket_index] = recval;
-            ++bucket_index;
-        }
-        printf("p_%d receiving %*s [%2d]\n", rank, rank*4, " ", recval);
-        
     }
 
     
     quicksort(part_bucket, 0, bucket_index-1);
     for (int l = 0; l < bucket_index; ++l) {
-        printf("p_%d bucket[%2d] = %d\n", rank, l, part_bucket[l]);
+        //printf("p_%d bucket[%2d] = %d\n", rank, l, part_bucket[l]);
     }
     
     MPI_Barrier(mcw);
 
-    
     int so_far = 0;
     if (rank == 0) {
-        printf("p_%d about to start writing to the file-----------------------\n", rank);
+        //printf("p_%d about to start writing to the file-----------------------\n", rank);
         MPI_File_set_view(outFile, 0, MPI_INT, MPI_INT, "native", MPI_INFO_NULL); 
-        printf("view set\n");
+        //printf("view set\n");
         MPI_File_write(outFile, part_bucket, bucket_index, MPI_INT, &st);
-        printf("p_%d writing %d ints to the file\n", rank, bucket_index);
+        //printf("p_%d writing %d ints to the file\n", rank, bucket_index);
         so_far = bucket_index*4;
         MPI_Send(&so_far, 1, MPI_INT, 1, TAG, mcw);
     }
     else if (rank == P-1) {
-        printf("p_%d waiting to recv\n", rank);
+        //printf("p_%d waiting to recv\n", rank);
         MPI_Recv(&so_far, 1, MPI_INT, rank-1, TAG, mcw, &st); 
-        printf("p_%d received %d\n", rank, so_far);
+        //printf("p_%d received %d\n", rank, so_far);
         MPI_File_set_view(outFile, so_far, MPI_INT, MPI_INT, "native", MPI_INFO_NULL); 
-        printf("p_%d writing %d ints to the file\n", rank, bucket_index);
+        //printf("p_%d writing %d ints to the file\n", rank, bucket_index);
         MPI_File_write(outFile, part_bucket, bucket_index, MPI_INT, &st);
 
     }
     else {
-        printf("p_%d waiting to recv\n", rank);
+        //printf("p_%d waiting to recv\n", rank);
         MPI_Recv(&so_far, 1, MPI_INT, rank-1, TAG, mcw, &st); 
-        printf("p_%d received %d\n", rank, so_far);
+        //printf("p_%d received %d\n", rank, so_far);
         MPI_File_set_view(outFile, so_far, MPI_INT, MPI_INT, "native", MPI_INFO_NULL); 
-        printf("p_%d writing %d ints to the file\n", rank, bucket_index);
+        //printf("p_%d writing %d ints to the file\n", rank, bucket_index);
         MPI_File_write(outFile, part_bucket, bucket_index, MPI_INT, &st);
         so_far += bucket_index*4;
 
         MPI_Send(&so_far, 1, MPI_INT, rank+1, TAG, mcw);
     }
-    */
+
 
     MPI_File_close(&inFile);
     MPI_File_close(&outFile);
 
-    MPI_Finalize();
+    free(data_buffer);
+    free(pivot_list);
+    free(part_bucket);
 
+    printf("process %d/%d of exiting from host <%s>\n", rank, P-1, host);
+
+
+    MPI_Finalize();
 
 
 
