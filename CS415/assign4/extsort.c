@@ -182,8 +182,8 @@ int main(int argc, char * argv[]) {
     }
     //printf("-------------------\n\n");
     
-
-    int * part_bucket = calloc((6*N)/P, sizeof(int));
+    int bucket_size = (3*N)/P;
+    int * part_bucket = calloc(bucket_size, sizeof(int));
 
     //used to determine end of sending packets.
     int junk = -1;
@@ -209,7 +209,7 @@ int main(int argc, char * argv[]) {
                 //printf("p_%d sending buffer range [%d --> %d] to bucket %d\n", rank, low, high, k);
                 send_len = (high - low) + 1; 
                 MPI_Send((void*) &send_len, 1,  MPI_INT, k, SIZE, mcw); 
-                MPI_Send((void*) &data_buffer[low], send_len, MPI_INT, k, TAG, mcw);
+                MPI_Isend((void*) &data_buffer[low], send_len, MPI_INT, k, TAG, mcw, &req);
             }
             else {
                 MPI_Send((void*) &junk, 1, MPI_INT, k, SIZE, mcw);
@@ -227,13 +227,14 @@ int main(int argc, char * argv[]) {
         //printf("p_%d sending buffer range [%d --> %d] to bucket %d\n", rank, low, high, k);
         send_len = (high - low) + 1; 
         MPI_Send((void*) &send_len, 1,  MPI_INT, k, SIZE, mcw); 
-        MPI_Send((void*) &data_buffer[low], send_len, MPI_INT, k, TAG, mcw);
+        MPI_Isend((void*) &data_buffer[low], send_len, MPI_INT, k, TAG, mcw, &req);
          
     }
+    else { 
+        MPI_Send((void*) &junk, 1, MPI_INT, k, SIZE, mcw);
+    }
     
-    MPI_Send((void*) &junk, 1, MPI_INT, k, SIZE, mcw);
 
-    
     int endcount = 0;
     int bucket_index = 0;
 
@@ -246,13 +247,22 @@ int main(int argc, char * argv[]) {
             ////printf("p_%d received %d end signals\n", rank, endcount);
         }
         else {
-            MPI_Recv(   (void*) &part_bucket[bucket_index],
+
+            if ((bucket_index + recval) >= bucket_size) {
+                bucket_size += recval;
+                part_bucket = (int*) realloc(part_bucket, (bucket_size+100)*sizeof(int)); 
+
+            }
+
+            MPI_Irecv(   (void*) &part_bucket[bucket_index],
                         recval,
                         MPI_INT, 
                         st.MPI_SOURCE,
                         TAG,
                         mcw,
-                        &st);
+                        &req);
+
+            MPI_Wait(&req, &st);
 
             //part_bucket[bucket_index] = recval;
             bucket_index += recval;
