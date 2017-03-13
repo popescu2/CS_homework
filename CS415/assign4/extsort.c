@@ -100,7 +100,7 @@ int main(int argc, char * argv[]) {
     // broadcast the size of the file 
     MPI_Bcast ((void*) &N, 1, MPI_INT, 0, mcw); 
 
-    if (N % P != 0) {
+    if (!(N % P == 0 && P*P <= N)) {
         printf("Array size %d is not evenly divisible by %d processes!\n", N, P);
         printf("Exiting...\n");
 
